@@ -15,10 +15,18 @@
         context_window = 512;
         provider_options = {
           openai_fim_compatible = {
-            name = "Ollama";
-            model = "qwen2.5-coder:14b";
-            end_point = "http://localhost:11434/v1/completions";
+            name = "vllm";
+            model = "Qwen3.6-35B-A3B";
+            end_point = "http://127.0.0.1:5411/v1/completions";
             api_key = "TERM";
+            template = {
+              prompt.__raw = ''
+                function(before, after, _)
+                  return '<|fim_prefix|>' .. before .. '<|fim_suffix|>' .. after .. '<|fim_middle|>'
+                end
+              '';
+              suffix = false;
+            };
             optional = {
               max_tokens = 100;
               top_p = 0.9;
