@@ -3,8 +3,9 @@
 A nixified Neovim config built on [nixvim](https://github.com/nix-community/nixvim),
 exposed as a flake. Two profiles:
 
-- **home** — local LLM completion via Ollama + [minuet-ai](https://github.com/milanglacier/minuet-ai.nvim).
-- **work** — GitHub Copilot.
+- **home**: local LLM completion via [minuet-ai](https://github.com/milanglacier/minuet-ai.nvim)
+  against an OpenAI-compatible server (vLLM behind llama-swap).
+- **work**: GitHub Copilot (`:Copilot auth` to sign in).
 
 ## Run it
 
@@ -23,16 +24,39 @@ nix run github:dembitskyi/nvim.nix#work
   imports = [ inputs.nvim-nix.homeModules.default ];
   programs.nvim-nix = {
     enable = true;
-    profile = "home";  # or "work"
+    profile = "home"; # or "work"
+    # Optional, default from the profile:
+    # ai.minuet.enable = false;
+    # ai.copilot.enable = true;
   };
 }
 ```
 
+## Layout
+
+| Path | Contents |
+| --- | --- |
+| `config/default.nix` | Imports, `ai.*` toggles, the `km` keymap helpers |
+| `config/options.nix` | Vim options |
+| `config/keymaps.nix` | General keymaps and `<leader>u` toggles |
+| `config/ui.nix` | mini.nvim, snacks, treesitter, which-key |
+| `config/editor.nix` | flash, markdown-preview, conform (format on save) |
+| `config/fzf-lua.nix`, `config/git.nix` | Pickers; gitsigns, lazygit |
+| `config/lsp/` | Language servers and LSP keymaps |
+| `config/completion/` | blink.cmp and its sources |
+| `config/ai/` | minuet and Copilot, each with its blink provider |
+
 ## Configure the local LLM
 
-The `home` profile points minuet-ai at an Ollama endpoint hard-coded in
-[`config/plugins/ai/minuet-ai.nix`](config/plugins/ai/minuet-ai.nix). Edit
-`end_point` and `model` (default: `Qwen3.6-35B-A3B`) to match your server.
+Edit `end_point` and `model` (default: `Qwen3.6-35B-A3B`) in
+[`config/ai/minuet.nix`](config/ai/minuet.nix). No request is sent until you
+type in insert mode.
+
+## Git completion
+
+In commit messages, issue/PR/@mention completion comes from the forge CLI.
+It turns itself on only when `gh` (GitHub) or `glab` (GitLab) is logged in,
+so there are no errors without a login.
 
 ## Flake outputs
 
