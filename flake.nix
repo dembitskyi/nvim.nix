@@ -21,11 +21,13 @@
         "aarch64-darwin"
       ];
 
-      # home = local LLM completion via minuet, work = GitHub Copilot.
+      # home = local LLM completion via minuet, work = GitHub Copilot. minuet
+      # is opt-in (ai.minuet.enable): its first insert-mode keystroke makes
+      # llama-swap start a model, so a plain `nix run` or test build must not
+      # wake the GPU.
       profiles = {
         home = {
           imports = [ ./config ];
-          ai.minuet.enable = lib.mkDefault true;
         };
         work = {
           imports = [ ./config ];
@@ -61,12 +63,12 @@
                 "work"
               ];
               default = "home";
-              description = "Which profile to install (home = local LLM via minuet, work = Copilot).";
+              description = "Which profile to install (home = local LLM via minuet, opt-in; work = Copilot).";
             };
             ai.minuet.enable = lib.mkOption {
               type = lib.types.bool;
-              default = cfg.profile == "home";
-              description = "Enable the minuet AI (local LLM) completion source. Defaults on for the home profile.";
+              default = false;
+              description = "Enable the minuet AI (local LLM) completion source. Off by default: typing in insert mode makes the model server start a model.";
             };
             ai.copilot.enable = lib.mkOption {
               type = lib.types.bool;

@@ -1,50 +1,17 @@
 { lib, ... }:
 {
-  # A centered "hello" instead of the default intro. It is only virtual text
-  # over the empty buffer nvim starts with, so `i` edits that buffer as usual;
-  # the greeting goes away on insert, any edit, file load or buffer switch.
-  autoCmd = [
-    {
-      event = "VimEnter";
-      callback.__raw = ''
-        function()
-          local buf = vim.api.nvim_get_current_buf()
-          local untouched = vim.fn.argc() == 0
-            and vim.api.nvim_buf_get_name(buf) == ""
-            and vim.api.nvim_buf_line_count(buf) == 1
-            and vim.api.nvim_buf_get_lines(buf, 0, 1, false)[1] == ""
-          if not untouched then return end
-
-          vim.opt.shortmess:append("I")
-          local ns = vim.api.nvim_create_namespace("greeting")
-          local function draw()
-            local win = vim.fn.bufwinid(buf)
-            if win == -1 then return end
-            local info = vim.fn.getwininfo(win)[1]
-            local text = "hello"
-            local lines = {}
-            for _ = 2, math.floor(info.height / 2) do table.insert(lines, { { "" } }) end
-            local pad = math.max(0, math.floor((info.width - info.textoff - #text) / 2))
-            table.insert(lines, { { string.rep(" ", pad) .. text, "Comment" } })
-            vim.api.nvim_buf_set_extmark(buf, ns, 0, 0, { id = 1, virt_lines = lines })
-          end
-          draw()
-
-          local group = vim.api.nvim_create_augroup("greeting", {})
-          vim.api.nvim_create_autocmd("VimResized", { group = group, callback = draw })
-          vim.api.nvim_create_autocmd({ "InsertEnter", "TextChanged", "BufReadPre", "BufFilePre", "BufLeave" }, {
-            group = group,
-            buffer = buf,
-            once = true,
-            callback = function()
-              vim.api.nvim_buf_clear_namespace(buf, ns, 0, -1)
-              vim.api.nvim_del_augroup_by_id(group)
-            end,
-          })
-        end
-      '';
-    }
-  ];
+  # Catppuccin Mocha, like the desktop (Hyprland, qutebrowser, sioyek).
+  colorschemes.catppuccin = {
+    enable = true;
+    settings = {
+      flavour = "mocha";
+      # Plugins catppuccin doesn't style by default.
+      integrations = {
+        snacks.enabled = true;
+        which_key = true;
+      };
+    };
+  };
 
   plugins = {
     mini-basics.enable = true;
@@ -63,6 +30,49 @@
     snacks = {
       enable = true;
       settings = {
+        # Start menu when nvim opens without a file. Any entry replaces it and
+        # it is wiped for good; `i` gives the usual empty buffer in insert mode.
+        dashboard = {
+          enabled = true;
+          preset.keys = [
+            {
+              icon = " ";
+              key = "i";
+              desc = "New file";
+              action = ":ene | startinsert";
+            }
+            {
+              icon = " ";
+              key = "f";
+              desc = "Find file";
+              action = ":FzfLua files";
+            }
+            {
+              icon = " ";
+              key = "r";
+              desc = "Recent files";
+              action = ":FzfLua oldfiles";
+            }
+            {
+              icon = " ";
+              key = "/";
+              desc = "Grep";
+              action = ":FzfLua live_grep";
+            }
+            {
+              icon = " ";
+              key = "q";
+              desc = "Quit";
+              action = ":qa";
+            }
+          ];
+          sections = [
+            {
+              section = "keys";
+              gap = 1;
+            }
+          ];
+        };
         indent.enabled = true;
         input.enabled = true;
         quickfile.enabled = true;

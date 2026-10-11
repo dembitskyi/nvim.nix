@@ -4,7 +4,9 @@ A nixified Neovim config built on [nixvim](https://github.com/nix-community/nixv
 exposed as a flake. Two profiles:
 
 - **home**: local LLM completion via [minuet-ai](https://github.com/milanglacier/minuet-ai.nvim)
-  against an OpenAI-compatible server (vLLM behind llama-swap).
+  against an OpenAI-compatible server (vLLM behind llama-swap). Opt-in with
+  `ai.minuet.enable = true`: the first keystroke in insert mode makes
+  llama-swap start the model, so `nix run` alone never does.
 - **work**: GitHub Copilot (`:Copilot auth` to sign in).
 
 ## Run it
@@ -25,9 +27,9 @@ nix run github:dembitskyi/nvim.nix#work
   programs.nvim-nix = {
     enable = true;
     profile = "home"; # or "work"
-    # Optional, default from the profile:
-    # ai.minuet.enable = false;
-    # ai.copilot.enable = true;
+    # Optional:
+    # ai.minuet.enable = true;   # off by default
+    # ai.copilot.enable = true;  # default from the profile (on for "work")
   };
 }
 ```
@@ -48,7 +50,8 @@ nix run github:dembitskyi/nvim.nix#work
 
 ## Configure the local LLM
 
-Edit `end_point` and `model` (default: `Qwen3.6-35B-A3B`) in
+Enable it with `ai.minuet.enable = true` (home-manager module), then edit
+`end_point` and `model` (default: `Qwen3.6-35B-A3B`) in
 [`config/ai/minuet.nix`](config/ai/minuet.nix). No request is sent until you
 type in insert mode.
 
